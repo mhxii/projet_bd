@@ -1,25 +1,37 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+const express = require("express");
 
 const app = express();
-const port = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+const logger = require("morgan");
 
-const uri = process.env.MONGODB_URI;
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const PORT = process.env.PORT || 5000;
 
-const connection = mongoose.connection;
-connection.once('open', () => {
-  console.log('MongoDB database connection established successfully');
+const db = require("./models");
+
+const bodyParser = require("body-parser");
+
+app.use(bodyParser.json());
+
+//app.use(bodyParser.urlencoded({ extended: true }));
+
+db.mongoose
+  .connect(db.url)
+  .then(() => {
+    console.log(`Connected to the database '${db.url}' !`);
+  })
+  .catch(err => {
+    console.log(`Cannot connect to the database '${db.url}' !`, err);
+    process.exit();
+  });
+
+app.use(logger("dev"));
+
+require("./routes/publications")(app);
+
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to application." });
 });
 
-const publicationRouter = require('./routes/publications');
-app.use('/publications', publicationRouter);
-
-app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
+app.listen(PORT, () => {
+  console.log(`Backend express server is running on port ${PORT}.`);
 });

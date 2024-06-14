@@ -1,10 +1,10 @@
-const router = require('express').Router();
-let Publication = require('../models/publication');
+module.exports =  app => {
+  const publication = require("../controllers/publication.js");
+  let router = require("express").Router();
 
-router.route('/authors').get((req, res) => {
-  Publication.distinct('author')
-    .then(authors => res.json(authors))
-    .catch(err => res.status(400).json('Error: ' + err));
-});
+  // Retrieve all publication
+  // router.get("/", publication.getAuteur);
+  router.get("/", (publication.getAuteur));
 
-module.exports = router;
+  app.use("/api/publication", router);
+};
